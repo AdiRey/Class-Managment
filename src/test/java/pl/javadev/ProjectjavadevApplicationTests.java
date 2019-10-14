@@ -1,4 +1,4 @@
-package pl.javadev.projectjavadev;
+package pl.javadev;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

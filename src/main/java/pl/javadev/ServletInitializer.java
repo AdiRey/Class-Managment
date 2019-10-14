@@ -1,4 +1,4 @@
-package pl.javadev.projectjavadev;
+package pl.javadev;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
