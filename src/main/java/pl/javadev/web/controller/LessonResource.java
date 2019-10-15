@@ -9,6 +9,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pl.javadev.exception.WrongTimeException;
 import pl.javadev.lesson.LessonDto;
 import pl.javadev.lesson.LessonService;
+import pl.javadev.lesson.LessonStudDto;
+import pl.javadev.user.UserDto;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -62,6 +64,20 @@ public class LessonResource {
         } catch (WrongTimeException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Zajęcia już się odbyły!");
         }
+    }
+
+    @PostMapping("/{id}/lesson")
+    ResponseEntity<LessonDto> addUserToLesson(@PathVariable Long id, @RequestBody UserDto dto) {
+        LessonDto lessonDto = lessonService.addUsers(id, dto);
+        if (lessonDto != null)
+            return ResponseEntity.ok(lessonDto);
+        else
+            return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{id}/lesson")
+    LessonStudDto getAllStuds(@PathVariable Long id) {
+        return lessonService.getAllStudents(id);
     }
 
 }

@@ -23,6 +23,10 @@ public class UserResource {
         this.userService = userService;
     }
 
+    public UserService getUserService() {
+        return userService;
+    }
+
     @GetMapping("")
     List<UserDto> findAll() {
         return userService.getAllUsers();

@@ -1,11 +1,14 @@
 package pl.javadev.lesson;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import pl.javadev.teacher.Teacher;
 import pl.javadev.user.User;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,8 +28,8 @@ public class Lesson implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_teacher")
     private Teacher teacher;
-    @ManyToMany(mappedBy = "lessons")
-    private List<User> users;
+    @ManyToMany(mappedBy = "lessons", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    private List<User> users = new ArrayList<>();
 
     Lesson() {}
 
@@ -36,6 +39,10 @@ public class Lesson implements Serializable {
         this.start = start;
         this.end = end;
         this.teacher = teacher;
+    }
+
+    public void addUser(User user) {
+        users.add(user);
     }
 
     public Long getId() {

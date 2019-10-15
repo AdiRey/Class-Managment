@@ -1,8 +1,12 @@
 package pl.javadev.lesson;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.javadev.exception.DuplicateIdxException;
 import pl.javadev.exception.WrongTimeException;
+import pl.javadev.user.User;
+import pl.javadev.user.UserDto;
+import pl.javadev.user.UserRepository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -13,9 +17,15 @@ import java.util.stream.Collectors;
 @Service
 public class LessonService {
     private LessonRepository lessonRepository;
+    private UserRepository userRepository;
 
     public LessonService(LessonRepository lessonRepository) {
         this.lessonRepository = lessonRepository;
+    }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public List<LessonDto> getAllLessons() {
@@ -55,5 +65,31 @@ public class LessonService {
             }
         }
         return deletedOne;
+    }
+
+    public LessonDto addUsers(Long id, UserDto userDto) {
+        Lesson lesson = null;
+        Optional<Lesson> foundOne = lessonRepository.findById(id);
+        if (foundOne.isPresent()) {
+            lesson = foundOne.get();
+            Optional<User> user = userRepository.findById(userDto.getId());
+            if (user.isPresent()) {
+                User user1 = user.get();
+                user1.getLessons().add(lesson);
+                lesson.getUsers().add(user1);
+                lessonRepository.save(lesson);
+            }
+        }
+        return LessonMapper.entityToDto(lesson);
+    }
+
+    public LessonStudDto getAllStudents(Long id) {
+        LessonStudDto lessonStudDto = null;
+        Optional<Lesson> stud = lessonRepository.findById(id);
+        if (stud.isPresent()) {
+            Lesson lesson = stud.get();
+            lessonStudDto = LessonMapper.entityToStudDto(lesson);
+        }
+        return lessonStudDto;
     }
 }

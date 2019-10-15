@@ -7,4 +7,7 @@ insert into user_role(role_id, role, description) values
 (2, 'ROLE_USER', 'student');
 
 insert into lesson(lesson_id, title, description, start, end) value
-(1, 'Javas', 'Siemanko ludzie', '2016-05-16 18:12:47.145482+00', '2016-05-16 20:12:47.145482+00')
+(1, 'Javas', 'Siemanko ludzie', '2016-05-16 18:12:47.145482+00', '2016-05-16 20:12:47.145482+00');
+
+insert into user_roles(users_user_id, roles_role_id) values
+(1,1), (2,1);
