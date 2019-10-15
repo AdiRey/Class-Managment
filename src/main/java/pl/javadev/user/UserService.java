@@ -1,6 +1,7 @@
 package pl.javadev.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.javadev.exception.DuplicateIdxException;
 import pl.javadev.userRole.UserRole;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private UserRepository userRepository;
     private UserRoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -21,6 +23,10 @@ public class UserService {
     @Autowired
     public void setRoleRepository(UserRoleRepository roleRepository) {
         this.roleRepository = roleRepository;
+    }
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UserDto> getAllUsers() {
@@ -37,6 +43,8 @@ public class UserService {
         UserRole role = roleRepository.findByRole("ROLE_USER");
         role.getUsers().add(user);
         user.getRoles().add(role);
+        String passHash = passwordEncoder.encode(user.getPassword());
+        user.setPassword(passHash);
         User savedUser = userRepository.save(user);
         return UserMapper.entityToDto(savedUser);
     }

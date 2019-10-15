@@ -20,13 +20,9 @@ public class User implements Serializable {
     private String password;
     @Column(unique = true, nullable = false, length = 250)
     private String indexNumber;
-    @Column(nullable = false)
     private String firstName;
-    @Column(nullable = false)
     private String lastName;
-    @Column(nullable = false)
     private String year;
-    @Column(nullable = false)
     private String major;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_lessons",
