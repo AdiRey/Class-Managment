@@ -5,7 +5,7 @@ import pl.javadev.userRole.UserRole;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "user")
@@ -28,10 +28,13 @@ public class User implements Serializable {
     private String year;
     @Column(nullable = false)
     private String major;
-    @ManyToMany
-    private List<Lesson> lessons;
-    @ManyToMany
-    private List<UserRole> roles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_lessons",
+            joinColumns = {@JoinColumn(name = "id_user", referencedColumnName = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "id_lesson", referencedColumnName = "lesson_id")})
+    private List<Lesson> lessons = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    private Set<UserRole> roles = new HashSet<>();
 
     User() {}
 
@@ -118,11 +121,11 @@ public class User implements Serializable {
         this.lessons = lessons;
     }
 
-    public List<UserRole> getRoles() {
+    public Set<UserRole> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<UserRole> roles) {
+    public void setRoles(Set<UserRole> roles) {
         this.roles = roles;
     }
 

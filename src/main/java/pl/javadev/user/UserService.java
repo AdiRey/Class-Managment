@@ -1,7 +1,10 @@
 package pl.javadev.user;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.javadev.exception.DuplicateIdxException;
+import pl.javadev.userRole.UserRole;
+import pl.javadev.userRole.UserRoleRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,9 +13,14 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
     private UserRepository userRepository;
+    private UserRoleRepository roleRepository;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+    @Autowired
+    public void setRoleRepository(UserRoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
     }
 
     public List<UserDto> getAllUsers() {
@@ -25,12 +33,16 @@ public class UserService {
                 u -> {
                     throw new DuplicateIdxException("Nie mozna duplikowac indeksow!");
                 });
-        User savedUser = userRepository.save(UserMapper.dtoRegToEntity(userDtoReg));
+        User user = UserMapper.dtoRegToEntity(userDtoReg);
+        UserRole role = roleRepository.findByRole("ROLE_USER");
+        role.getUsers().add(user);
+        user.getRoles().add(role);
+        User savedUser = userRepository.save(user);
         return UserMapper.entityToDto(savedUser);
     }
 
-    public Optional<UserDto> findById(Long id) {
-        return userRepository.findById(id).map(UserMapper::entityToDto);
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 
     public UserDto update(UserDtoReg dtoReg) {

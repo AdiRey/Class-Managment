@@ -5,6 +5,7 @@ import pl.javadev.user.User;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "user_role")
@@ -15,7 +16,7 @@ public class UserRole implements Serializable {
     private Long id;
     private String role;
     private String description;
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     private List<User> users;
 
     public Long getId() {
@@ -48,5 +49,29 @@ public class UserRole implements Serializable {
 
     public void setUsers(List<User> users) {
         this.users = users;
+    }
+
+    @Override
+    public String toString() {
+        return "UserRole{" +
+                "id=" + id +
+                ", role='" + role + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserRole)) return false;
+        UserRole role1 = (UserRole) o;
+        return Objects.equals(id, role1.id) &&
+                Objects.equals(role, role1.role) &&
+                Objects.equals(description, role1.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, role, description);
     }
 }

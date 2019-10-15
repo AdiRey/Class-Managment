@@ -1,5 +1,11 @@
 package pl.javadev.user;
 
+import pl.javadev.userRole.UserRole;
+import pl.javadev.userRole.UserRoleDto;
+
+import java.util.HashSet;
+import java.util.Set;
+
 public class UserDto {
     private Long id;
     private String email;
@@ -8,6 +14,7 @@ public class UserDto {
     private String lastName;
     private String year;
     private String major;
+    private Set<UserRoleDto> roles = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -63,6 +70,14 @@ public class UserDto {
 
     public void setMajor(String major) {
         this.major = major;
+    }
+
+    public Set<UserRoleDto> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<UserRoleDto> roles) {
+        this.roles = roles;
     }
 }
 
