@@ -1,26 +1,19 @@
 package pl.javadev.lesson;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import pl.javadev.user.User;
+import pl.javadev.teacher.Teacher;
 import pl.javadev.user.UserDto;
 
-import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LessonStudDto {
+public class LessonStudentsDto {
     private Long id;
-    @NotNull
     private String title;
-    @NotNull
     private String description;
-    @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "E, dd MMM yyyy HH:mm:ss z", timezone = "GMT+2")
-    private Timestamp start;
-    @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "E, dd MMM yyyy HH:mm:ss z", timezone = "GMT+2")
-    private Timestamp end;
+    private LocalDateTime start;
+    private LocalDateTime end;
+    private Teacher teacher;
     private List<UserDto> users = new ArrayList<>();
 
     public Long getId() {
@@ -47,19 +40,19 @@ public class LessonStudDto {
         this.description = description;
     }
 
-    public Timestamp getStart() {
+    public LocalDateTime getStart() {
         return start;
     }
 
-    public void setStart(Timestamp start) {
+    public void setStart(LocalDateTime start) {
         this.start = start;
     }
 
-    public Timestamp getEnd() {
+    public LocalDateTime getEnd() {
         return end;
     }
 
-    public void setEnd(Timestamp end) {
+    public void setEnd(LocalDateTime end) {
         this.end = end;
     }
 
@@ -69,5 +62,13 @@ public class LessonStudDto {
 
     public void setUsers(List<UserDto> users) {
         this.users = users;
+    }
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
     }
 }

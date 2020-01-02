@@ -1,24 +1,27 @@
 package pl.javadev.user;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
-public class UserDtoReg {
+public class UserRegistrationDto {
     private Long id;
     @Email
-    @NotNull
     private String email;
-    @NotNull
+    @Size(min = 6)
+    @NotEmpty
     private String password;
-    @NotNull
-    private String indexNumber;
-    @NotNull
+    @Size(min = 6)
+    @NotEmpty
+    private String repeatedPassword;
+    @NotEmpty
     private String firstName;
-    @NotNull
+    @NotEmpty
     private String lastName;
-    @NotNull
-    private String year;
-    @NotNull
+    @NotEmpty
+    @Size(min = 9, max = 9)
+    private String grade;
+    @NotEmpty
     private String major;
 
     public Long getId() {
@@ -45,12 +48,12 @@ public class UserDtoReg {
         this.password = password;
     }
 
-    public String getIndexNumber() {
-        return indexNumber;
+    public String getRepeatedPassword() {
+        return repeatedPassword;
     }
 
-    public void setIndexNumber(String indexNumber) {
-        this.indexNumber = indexNumber;
+    public void setRepeatedPassword(String repeatedPassword) {
+        this.repeatedPassword = repeatedPassword;
     }
 
     public String getFirstName() {
@@ -69,12 +72,12 @@ public class UserDtoReg {
         this.lastName = lastName;
     }
 
-    public String getYear() {
-        return year;
+    public String getGrade() {
+        return grade;
     }
 
-    public void setYear(String year) {
-        this.year = year;
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 
     public String getMajor() {

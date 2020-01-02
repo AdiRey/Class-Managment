@@ -3,42 +3,27 @@ package pl.javadev.teacher;
 import pl.javadev.lesson.Lesson;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "teacher")
-public class Teacher implements Serializable {
+public class Teacher{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "teacher_id")
+    @Column(name = "id_teacher")
     private Long id;
-    @NotNull
-    @Column(nullable = false)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
-    @NotNull
-    @Column(nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
-    @NotNull
-    @Column(nullable = false)
+    @Column(name = "degree", nullable = false)
     private String degree;
-    @NotNull
-    @Email
-    @Column(nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
     @OneToMany(mappedBy = "teacher")
     private List<Lesson> lessons;
 
-    Teacher() {}
-
-    public Teacher(String firstName, String lastName, String degree, String email) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.degree = degree;
-        this.email = email;
-    }
 
     public Long getId() {
         return id;
@@ -89,14 +74,19 @@ public class Teacher implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "Teacher{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", degree='" + degree + '\'' +
-                ", email='" + email + '\'' +
-                ", lessons=" + lessons +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Teacher)) return false;
+        Teacher teacher = (Teacher) o;
+        return Objects.equals(id, teacher.id) &&
+                Objects.equals(firstName, teacher.firstName) &&
+                Objects.equals(lastName, teacher.lastName) &&
+                Objects.equals(degree, teacher.degree) &&
+                Objects.equals(email, teacher.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, degree, email);
     }
 }

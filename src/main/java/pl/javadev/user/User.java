@@ -4,46 +4,37 @@ import pl.javadev.lesson.Lesson;
 import pl.javadev.userRole.UserRole;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.*;
 
 @Entity
 @Table(name = "user")
-public class User implements Serializable {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "id_user")
     private Long id;
-    @Column(unique = true, nullable = false, length = 250)
+    @Column(name = "email", unique = true, nullable = false, length = 250)
     private String email;
-    @Column(nullable = false)
+    @Column(name = "password",nullable = false)
     private String password;
     @Column(unique = true, nullable = false, length = 250)
     private String indexNumber;
+    @Column(name = "first_name")
     private String firstName;
+    @Column(name = "last_name")
     private String lastName;
-    private String year;
+    @Column(name = "grade")
+    private String grade;
+    @Column(name = "major")
     private String major;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "user_lessons",
-            joinColumns = {@JoinColumn(name = "id_user", referencedColumnName = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "id_lesson", referencedColumnName = "lesson_id")})
+            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id_user")},
+            inverseJoinColumns = {@JoinColumn(name = "lesson_id", referencedColumnName = "id_lesson")})
     private List<Lesson> lessons = new ArrayList<>();
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<UserRole> roles = new HashSet<>();
 
-    User() {}
-
-    public User(String email, String password, String indexNumber,
-                String firstName, String lastName, String year, String major) {
-        this.email = email;
-        this.password = password;
-        this.indexNumber = indexNumber;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.year = year;
-        this.major = major;
-    }
 
     public Long getId() {
         return id;
@@ -93,12 +84,12 @@ public class User implements Serializable {
         this.lastName = lastName;
     }
 
-    public String getYear() {
-        return year;
+    public String getGrade() {
+        return grade;
     }
 
-    public void setYear(String year) {
-        this.year = year;
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 
     public String getMajor() {
@@ -126,17 +117,23 @@ public class User implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", indexNumber='" + indexNumber + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", year='" + year + '\'' +
-                ", major='" + major + '\'' +
-                ", lessons=" + lessons +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) &&
+                Objects.equals(email, user.email) &&
+                Objects.equals(password, user.password) &&
+                Objects.equals(indexNumber, user.indexNumber) &&
+                Objects.equals(firstName, user.firstName) &&
+                Objects.equals(lastName, user.lastName) &&
+                Objects.equals(grade, user.grade) &&
+                Objects.equals(major, user.major) &&
+                Objects.equals(roles, user.roles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email, password, indexNumber, firstName, lastName, grade, major, roles);
     }
 }

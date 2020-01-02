@@ -1,9 +1,7 @@
 package pl.javadev.lesson;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class LessonDto {
     private Long id;
@@ -12,11 +10,9 @@ public class LessonDto {
     @NotNull
     private String description;
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "E, dd MMM yyyy HH:mm:ss z", timezone = "GMT+2")
-    private Timestamp start;
+    private LocalDateTime start;
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "E, dd MMM yyyy HH:mm:ss z", timezone = "GMT+2")
-    private Timestamp end;
+    private LocalDateTime end;
 
     public Long getId() {
         return id;
@@ -42,19 +38,19 @@ public class LessonDto {
         this.description = description;
     }
 
-    public Timestamp getStart() {
+    public LocalDateTime getStart() {
         return start;
     }
 
-    public void setStart(Timestamp start) {
+    public void setStart(LocalDateTime start) {
         this.start = start;
     }
 
-    public Timestamp getEnd() {
+    public LocalDateTime getEnd() {
         return end;
     }
 
-    public void setEnd(Timestamp end) {
+    public void setEnd(LocalDateTime end) {
         this.end = end;
     }
 }

@@ -1,24 +1,32 @@
 package pl.javadev.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.javadev.exception.DuplicateIdxException;
+import pl.javadev.exception.other.ConflictIdException;
+import pl.javadev.exception.other.ConflictPasswordException;
+import pl.javadev.exception.other.InvalidIdException;
+import pl.javadev.exception.web.DifferentPasswordException;
+import pl.javadev.exception.web.DuplicateEmailException;
 import pl.javadev.userRole.UserRole;
 import pl.javadev.userRole.UserRoleRepository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import javax.transaction.Transactional;
+import java.util.*;
 
 @Service
 public class UserService {
+    private UserMapper userMapper;
     private UserRepository userRepository;
     private UserRoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
-
-    public UserService(UserRepository userRepository) {
+    @Autowired
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
     @Autowired
     public void setRoleRepository(UserRoleRepository roleRepository) {
@@ -29,61 +37,109 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream().map(UserMapper::entityToDto).collect(Collectors.toList());
-    }
-
-    public UserDto save(UserDtoReg userDtoReg) {
-        Optional<User> foundOne = userRepository.findByIndexNumber(userDtoReg.getIndexNumber());
-        foundOne.ifPresent(
-                u -> {
-                    throw new DuplicateIdxException("Nie mozna duplikowac indeksow!");
-                });
-        User user = UserMapper.dtoRegToEntity(userDtoReg);
-        UserRole role = roleRepository.findByRole("ROLE_USER");
-        role.getUsers().add(user);
+    @Transactional
+    public UserDto save(UserRegistrationDto dto) {
+        Optional<User> foundUser = userRepository.findByEmail(dto.getEmail());
+        foundUser.ifPresent(
+                u -> {throw new DuplicateEmailException();
+                }
+        );
+        if (!dto.getPassword().equals(dto.getRepeatedPassword()))
+            throw new DifferentPasswordException();
+        long userNumber = userRepository.lastIndexNumber();
+        User user = UserRegistrationMapper.map(dto);
+        UserRole role = roleRepository.findByName("ROLE_USER");
+        String hashPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashPassword);
         user.getRoles().add(role);
-        String passHash = passwordEncoder.encode(user.getPassword());
-        user.setPassword(passHash);
+        user.setIndexNumber(String.valueOf(++userNumber));
         User savedUser = userRepository.save(user);
-        return UserMapper.entityToDto(savedUser);
+        return userMapper.map(savedUser);
     }
 
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
-    }
-
-    public UserDto update(UserDtoReg dtoReg) {
-        Optional<User> foundOne = userRepository.findByIndexNumber(dtoReg.getIndexNumber());
-        foundOne.ifPresent(
-                u -> {
-                    if (!u.getId().equals(dtoReg.getId()))
-                        throw new DuplicateIdxException("To nie to id!");
-                });
-        User savedUser = userRepository.save(UserMapper.dtoRegToEntity(dtoReg));
-        return UserMapper.entityToDto(savedUser);
-    }
-
-    public UserDto delete(Long id) {
-        UserDto deletedOne = null;
-        Optional<User> foundOne = userRepository.findById(id);
-        if (foundOne.isPresent()) {
-            User user = foundOne.get();
-            deletedOne = UserMapper.entityToDto(user);
+    public UserDto delete(Long id, UserDeleteDto dto) {
+        try {
+            if (!id.equals(dto.getId()))
+                throw new ConflictIdException();
+            Optional<User> foundUser = userRepository.findById(id);
+            User user = foundUser.get();
+            if (!user.getPassword().equals(passwordEncoder.encode(dto.getPassword())))
+                throw new ConflictPasswordException();
+            UserDto deletedUserDto = userMapper.map(user);
             userRepository.delete(user);
+            return deletedUserDto;
+        } catch (NoSuchElementException e) {
+            throw new InvalidIdException();
         }
-        return deletedOne;
     }
 
-    public UserDto editPassword(Long id, String password) {
-        UserDto userDto = null;
-        Optional<User> foundOne = userRepository.findById(id);
-        if (foundOne.isPresent()) {
-            User user = foundOne.get();
-            user.setPassword(password);
-            User savedUser = userRepository.save(user);
-            userDto = UserMapper.entityToDto(savedUser);
+    public List<UserDto> deleteAll() {
+        List<UserDto> users = new LinkedList<>();
+        for (User user : userRepository.findAll()) {
+            users.add(userMapper.map(user));
         }
-        return userDto;
+        userRepository.deleteAll();
+        return users;
     }
+
+    public Page<UserDto> findAllUsersUsingPaging(int numberOfPage, String sortText, String text) {
+        Sort sort;
+        if (sortText.equals("DESC"))
+            sort = Sort.by(new Sort.Order(Sort.Direction.DESC, "lastName"));
+        else
+            sort = Sort.by(new Sort.Order(Sort.Direction.ASC, "lastName"));
+        return userRepository.findAllByLastNameContainingIgnoreCase
+                (text, PageRequest.of(numberOfPage, 20, sort)).map(userMapper::map);
+    }
+
+    public UserDto findUser(Long id) {
+        try {
+            Optional<User> foundUser = userRepository.findById(id);
+            return userMapper.map(foundUser.get());
+        } catch (NoSuchElementException e) {
+            throw new InvalidIdException();
+        }
+    }
+
+    @Transactional
+    public UserDto editUser(Long id, UserDto dto) {
+        try {
+            if (!id.equals(dto.getId()))
+                throw new ConflictIdException();
+            Optional<User> foundUser = userRepository.findById(id);
+            User user = foundUser.get();
+            user.setFirstName(dto.getFirstName());
+            user.setLastName(dto.getLastName());
+            user.setEmail(dto.getEmail());
+            user.setMajor(dto.getMajor());
+            user.setGrade(dto.getGrade());
+            return userMapper.map(user);
+        } catch (NoSuchElementException e) {
+            throw new InvalidIdException();
+        }
+    }
+
+    @Transactional
+    public UserDto editPassword(Long id, UserPasswordDto dto) {
+        try {
+            if (!id.equals(dto.getId()))
+                throw new ConflictIdException();
+            else if (!dto.getPassword().equals(dto.getRepeatedPassword()))
+                throw new DifferentPasswordException();
+            Optional<User> foundUser = userRepository.findById(id);
+            User user = foundUser.get();
+            assert !user.getPassword().equals(passwordEncoder.encode(dto.getOldPassword()));
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+            return userMapper.map(user);
+        } catch (NoSuchElementException e) {
+            throw new InvalidIdException();
+        } catch (AssertionError e) {
+            throw new ConflictPasswordException();
+        }
+    }
+
+    public UserDto findById(Long id) {
+        return userRepository.findById(id).map(userMapper::map).orElse(null);
+    }
+
 }
