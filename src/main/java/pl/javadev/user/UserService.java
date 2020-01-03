@@ -1,10 +1,6 @@
 package pl.javadev.user;
 
 import org.springframework.data.domain.Page;
-import pl.javadev.user.dto.UserDeleteDto;
-import pl.javadev.user.dto.UserDto;
-import pl.javadev.user.dto.UserPasswordDto;
-import pl.javadev.user.dto.UserRegistrationDto;
 
 import java.util.List;
 

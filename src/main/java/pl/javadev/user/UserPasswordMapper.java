@@ -1,7 +1,4 @@
-package pl.javadev.user.mapper;
-
-import pl.javadev.user.User;
-import pl.javadev.user.dto.UserPasswordDto;
+package pl.javadev.user;
 
 public class UserPasswordMapper {
     public static User map(UserPasswordDto dto) {

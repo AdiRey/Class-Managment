@@ -1,8 +1,6 @@
-package pl.javadev.user.mapper;
+package pl.javadev.user;
 
 import org.springframework.stereotype.Component;
-import pl.javadev.user.User;
-import pl.javadev.user.dto.UserDto;
 import pl.javadev.userRole.UserRole;
 import pl.javadev.userRole.UserRoleRepository;
 

@@ -11,12 +11,6 @@ import pl.javadev.exception.other.ConflictPasswordException;
 import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.exception.web.DifferentPasswordException;
 import pl.javadev.exception.web.DuplicateEmailException;
-import pl.javadev.user.dto.UserDeleteDto;
-import pl.javadev.user.dto.UserDto;
-import pl.javadev.user.dto.UserPasswordDto;
-import pl.javadev.user.dto.UserRegistrationDto;
-import pl.javadev.user.mapper.UserMapper;
-import pl.javadev.user.mapper.UserRegistrationMapper;
 import pl.javadev.userRole.UserRole;
 import pl.javadev.userRole.UserRoleRepository;
 

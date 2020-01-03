@@ -1,4 +1,4 @@
-package pl.javadev.user.dto;
+package pl.javadev.user;
 
 import javax.validation.constraints.Min;
 

@@ -6,18 +6,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pl.javadev.exception.other.ConflictIdException;
-import pl.javadev.exception.other.ConflictPasswordException;
 import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.exception.other.WrongTimeException;
-import pl.javadev.exception.web.DifferentPasswordException;
-import pl.javadev.exception.web.DuplicateEmailException;
-import pl.javadev.exception.web.DuplicateIndexException;
+import pl.javadev.teacher.Teacher;
+import pl.javadev.teacher.TeacherDto;
+import pl.javadev.teacher.TeacherRepository;
 import pl.javadev.user.User;
 import pl.javadev.user.UserRepository;
-import pl.javadev.user.dto.UserDto;
-import pl.javadev.user.dto.UserRegistrationDto;
-import pl.javadev.user.mapper.UserRegistrationMapper;
-import pl.javadev.userRole.UserRole;
+import pl.javadev.user.UserDto;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -27,9 +23,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
-public class LessonServiceImpl {
+public class LessonServiceImpl implements LessonService{
     private LessonRepository lessonRepository;
     private UserRepository userRepository;
+    private TeacherRepository teacherRepository;
 
     public LessonServiceImpl(LessonRepository lessonRepository) {
         this.lessonRepository = lessonRepository;
@@ -38,6 +35,10 @@ public class LessonServiceImpl {
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+    @Autowired
+    public void setTeacherRepository(TeacherRepository teacherRepository) {
+        this.teacherRepository = teacherRepository;
     }
 
     public Page<LessonDto> findAllLessonsUsingPaging(int numberOfPage, String sortText, String text) {
@@ -57,6 +58,19 @@ public class LessonServiceImpl {
             Lesson lesson = foundLesson.get();
             Optional<User> foundUser = userRepository.findById(userDto.getId());
             lesson.addUser(foundUser.get());
+            return LessonMapper.map(lesson);
+        } catch (NoSuchElementException e) {
+            throw new InvalidIdException();
+        }
+    }
+
+    @Transactional
+    public LessonDto addTeacher(Long id, TeacherDto teacherDto) {
+        try {
+            Optional<Lesson> foundLesson = lessonRepository.findById(id);
+            Lesson lesson = foundLesson.get();
+            Optional<Teacher> foundTeacher = teacherRepository.findById(teacherDto.getId());
+            lesson.setTeacher(foundTeacher.get());
             return LessonMapper.map(lesson);
         } catch (NoSuchElementException e) {
             throw new InvalidIdException();

@@ -25,7 +25,7 @@ public class Lesson {
     private LocalDateTime start;
     @Column(name = "end", nullable = false)
     private LocalDateTime end;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "teacher_id")
     private Teacher teacher;
     @ManyToMany(mappedBy = "lessons")

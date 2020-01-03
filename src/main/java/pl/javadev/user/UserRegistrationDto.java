@@ -1,4 +1,4 @@
-package pl.javadev.user.dto;
+package pl.javadev.user;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;

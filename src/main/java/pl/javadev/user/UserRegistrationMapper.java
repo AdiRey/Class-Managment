@@ -1,7 +1,4 @@
-package pl.javadev.user.mapper;
-
-import pl.javadev.user.User;
-import pl.javadev.user.dto.UserRegistrationDto;
+package pl.javadev.user;
 
 public class UserRegistrationMapper {
     public static UserRegistrationDto map(User user) {

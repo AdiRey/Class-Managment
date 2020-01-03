@@ -14,8 +14,8 @@ import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.lesson.LessonDto;
 import pl.javadev.lesson.LessonRegistrationDto;
 import pl.javadev.lesson.LessonServiceImpl;
-import pl.javadev.user.dto.UserDeleteDto;
-import pl.javadev.user.dto.UserDto;
+import pl.javadev.teacher.TeacherDto;
+import pl.javadev.user.UserDto;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -82,6 +82,15 @@ public class LessonResource {
             return ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/{id}/teacher")
+    ResponseEntity<LessonDto> addTeacherToLesson(@PathVariable Long id, @RequestBody TeacherDto dto) {
+        LessonDto lessonDto = lessonServiceImpl.addTeacher(id, dto);
+        if (lessonDto != null)
+            return ResponseEntity.ok(lessonDto);
+        else
+            return ResponseEntity.notFound().build();
+    }
+
     @PutMapping("/{id}")
     ResponseEntity<LessonDto> editLesson(@PathVariable Long id, @RequestBody @Valid LessonRegistrationDto dto, BindingResult result) {
         if (result.hasErrors()) {
@@ -96,7 +105,7 @@ public class LessonResource {
     }
 
     @PutMapping("")
-    ResponseEntity<UserDto> edit() {
+    void edit() {
         throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED);
     }
 

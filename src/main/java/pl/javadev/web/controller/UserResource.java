@@ -12,10 +12,10 @@ import pl.javadev.exception.other.ConflictIdException;
 import pl.javadev.exception.other.ConflictPasswordException;
 import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.user.*;
-import pl.javadev.user.dto.UserDeleteDto;
-import pl.javadev.user.dto.UserDto;
-import pl.javadev.user.dto.UserPasswordDto;
-import pl.javadev.user.dto.UserRegistrationDto;
+import pl.javadev.user.UserDeleteDto;
+import pl.javadev.user.UserDto;
+import pl.javadev.user.UserPasswordDto;
+import pl.javadev.user.UserRegistrationDto;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -100,7 +100,7 @@ public class UserResource {
     }
 
     @PutMapping("")
-    ResponseEntity<UserDto> edit() {
+    void edit() {
         throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED);
     }
 

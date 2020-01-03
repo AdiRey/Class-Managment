@@ -17,9 +17,9 @@ public class Teacher{
     private String firstName;
     @Column(name = "last_name", nullable = false)
     private String lastName;
-    @Column(name = "degree", nullable = false)
+    @Column(name = "degree")
     private String degree;
-    @Column(name = "email", nullable = false)
+    @Column(name = "email")
     private String email;
     @OneToMany(mappedBy = "teacher")
     private List<Lesson> lessons;
