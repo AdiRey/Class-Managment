@@ -1,20 +1,18 @@
 package pl.javadev.lesson;
 
-import pl.javadev.teacher.Teacher;
-import pl.javadev.user.UserDto;
-
+import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-public class LessonStudentsDto {
+public class LessonRegistrationDto {
     private Long id;
+    @NotEmpty
     private String title;
+    @NotEmpty
     private String description;
+    @NotEmpty
     private LocalDateTime start;
+    @NotEmpty
     private LocalDateTime end;
-    private Teacher teacher;
-    private List<UserDto> users = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -54,21 +52,5 @@ public class LessonStudentsDto {
 
     public void setEnd(LocalDateTime end) {
         this.end = end;
-    }
-
-    public List<UserDto> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<UserDto> users) {
-        this.users = users;
-    }
-
-    public Teacher getTeacher() {
-        return teacher;
-    }
-
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
     }
 }

@@ -1,4 +1,4 @@
-package pl.javadev.user;
+package pl.javadev.user.dto;
 
 import java.util.HashSet;
 import java.util.Set;

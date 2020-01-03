@@ -12,6 +12,10 @@ import pl.javadev.exception.other.ConflictIdException;
 import pl.javadev.exception.other.ConflictPasswordException;
 import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.user.*;
+import pl.javadev.user.dto.UserDeleteDto;
+import pl.javadev.user.dto.UserDto;
+import pl.javadev.user.dto.UserPasswordDto;
+import pl.javadev.user.dto.UserRegistrationDto;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -23,14 +27,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserResource {
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
-    public UserResource(UserService userService) {
-        this.userService = userService;
+    public UserResource(UserServiceImpl userServiceImpl) {
+        this.userServiceImpl = userServiceImpl;
     }
 
     @PostMapping("")
-    ResponseEntity<UserDto> save(@RequestBody @Valid UserRegistrationDto dto, BindingResult result,
+    ResponseEntity<UserDto> save(@RequestBody @Valid final UserRegistrationDto dto, BindingResult result,
                                  HttpServletResponse response) {
         if (result.hasErrors()) {
             List<FieldError> errors = result.getFieldErrors();
@@ -43,22 +47,23 @@ public class UserResource {
 
         if (dto.getId() != null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An account with existing id cannot be created.");
-        UserDto savedUserDto = userService.save(dto);
+        UserDto savedUserDto = userServiceImpl.save(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("{id}")
                 .buildAndExpand(savedUserDto.getId()).toUri();
         return ResponseEntity.created(location).body(savedUserDto);
     }
 
     @PostMapping("/{id}")
-    void savingUnderSpecifiedId(@PathVariable Long id) {
-        UserDto user = userService.findById(id);
+    void savingUnderSpecifiedId(@PathVariable final Long id) {
+        UserDto user = userServiceImpl.findById(id);
         if (user == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id doesn't exist.");
         throw new ResponseStatusException(HttpStatus.CONFLICT, "This id is already taken.");
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<UserDto> delete(@PathVariable Long id, @RequestBody @Valid UserDeleteDto dto, BindingResult result) {
+    ResponseEntity<UserDto> delete(@PathVariable final Long id, @RequestBody @Valid final UserDeleteDto dto,
+                                   BindingResult result) {
         if (result.hasErrors()) {
             List<FieldError> errors = result.getFieldErrors();
             for (FieldError error : errors ) {
@@ -67,7 +72,7 @@ public class UserResource {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Invalid data, please check it again.");
         }
         try {
-            UserDto userDto = userService.delete(id, dto);
+            UserDto userDto = userServiceImpl.delete(id, dto);
             return ResponseEntity.ok(userDto);
         } catch (ConflictPasswordException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Wrong password.");
@@ -76,22 +81,22 @@ public class UserResource {
 
     @DeleteMapping("") // only for owner TODO add a new role "OWNER"
     ResponseEntity<List<UserDto>> deleteAll() {
-        List<UserDto> users = userService.deleteAll();
+        List<UserDto> users = userServiceImpl.deleteAll();
         if (users.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no user in this database.");
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("")
-    Page<UserDto> findUsers(@RequestParam(required = false, defaultValue = "0") Integer page,
-                            @RequestParam(required = false, defaultValue = "ASC") String sort,
-                            @RequestParam(required = false, defaultValue = "") String filter) {
-        return userService.findAllUsersUsingPaging(page, sort, filter);
+    Page<UserDto> findUsers(@RequestParam(required = false, defaultValue = "0") final Integer page,
+                            @RequestParam(required = false, defaultValue = "ASC") final String sort,
+                            @RequestParam(required = false, defaultValue = "") final String filter) {
+        return userServiceImpl.findAllUsersUsingPaging(page, sort, filter);
     }
 
     @GetMapping("/{id}")
-    UserDto findUserById(@PathVariable Long id) {
-        return userService.findUser(id);
+    UserDto findUserById(@PathVariable final Long id) {
+        return userServiceImpl.findUser(id);
     }
 
     @PutMapping("")
@@ -100,7 +105,8 @@ public class UserResource {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<UserDto> editUser(@PathVariable Long id, @RequestBody @Valid UserDto dto, BindingResult result) {
+    ResponseEntity<UserDto> editUser(@PathVariable final Long id, @RequestBody @Valid final UserDto dto,
+                                     BindingResult result) {
         if (result.hasErrors()) {
             List<FieldError> errors = result.getFieldErrors();
             for (FieldError error : errors ) {
@@ -109,12 +115,12 @@ public class UserResource {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Invalid data, please check it again.");
         }
 
-        UserDto userDto = userService.editUser(id, dto);
+        UserDto userDto = userServiceImpl.editUser(id, dto);
         return ResponseEntity.ok(userDto);
     }
 
     @PutMapping("/{id}/password")
-    ResponseEntity<UserDto> editUserPassword(@PathVariable Long id, @RequestBody @Valid UserPasswordDto dto,
+    ResponseEntity<UserDto> editUserPassword(@PathVariable final Long id, @RequestBody @Valid final UserPasswordDto dto,
                                              BindingResult result) {
         if (result.hasErrors()) {
             List<FieldError> errors = result.getFieldErrors();
@@ -124,7 +130,7 @@ public class UserResource {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Invalid data, please check it again.");
         }
         try {
-            UserDto userDto = userService.editPassword(id, dto);
+            UserDto userDto = userServiceImpl.editPassword(id, dto);
             return ResponseEntity.ok(userDto);
         } catch (ConflictPasswordException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords don't match.");

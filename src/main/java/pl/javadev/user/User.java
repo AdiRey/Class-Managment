@@ -27,13 +27,21 @@ public class User {
     private String grade;
     @Column(name = "major")
     private String major;
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(name = "user_lessons",
             joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id_user")},
             inverseJoinColumns = {@JoinColumn(name = "lesson_id", referencedColumnName = "id_lesson")})
     private List<Lesson> lessons = new ArrayList<>();
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private Set<UserRole> roles = new HashSet<>();
+
+    public void addRole(UserRole role) {
+        this.roles.add(role);
+    }
+
+    public void addLesson(Lesson lesson) {
+        this.lessons.add(lesson);
+    }
 
 
     public Long getId() {

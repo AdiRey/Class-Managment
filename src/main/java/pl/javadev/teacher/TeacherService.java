@@ -16,7 +16,8 @@ public class TeacherService {
     }
 
     public List<TeacherDto> findAllTeachers() {
-        return teacherRepository.findAll().stream().map(TeacherMapper::map).collect(Collectors.toList());
+        return null;
+        //return teacherRepository.findAll().stream().map(TeacherMapper::map).collect(Collectors.toList());
     }
 
     public TeacherDto findById(Long id) {

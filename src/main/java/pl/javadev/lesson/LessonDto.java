@@ -1,17 +1,12 @@
 package pl.javadev.lesson;
 
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public class LessonDto {
     private Long id;
-    @NotNull
     private String title;
-    @NotNull
     private String description;
-    @NotNull
     private LocalDateTime start;
-    @NotNull
     private LocalDateTime end;
 
     public Long getId() {

@@ -1,7 +1,5 @@
 package pl.javadev.lesson;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import pl.javadev.teacher.Teacher;
 import pl.javadev.user.User;
 
@@ -31,9 +29,17 @@ public class Lesson {
     @JoinColumn(name = "teacher_id")
     private Teacher teacher;
     @ManyToMany(mappedBy = "lessons")
-    @Fetch(FetchMode.SELECT) // TODO Is it really necessary?
     private List<User> users = new ArrayList<>();
 
+    public Lesson() {
+    }
+    // for tests
+    public Lesson(String title, String description, LocalDateTime start, LocalDateTime end) {
+        this.title = title;
+        this.description = description;
+        this.start = start;
+        this.end = end;
+    }
 
     public void addUser(User user) {
         users.add(user);
