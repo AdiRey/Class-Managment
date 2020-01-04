@@ -1,4 +1,4 @@
-package pl.javadev.lesson;
+package pl.javadev.web.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import pl.javadev.exception.other.ConflictIdException;
 import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.exception.other.WrongTimeException;
+import pl.javadev.lesson.*;
 import pl.javadev.teacher.Teacher;
 import pl.javadev.teacher.TeacherDto;
 import pl.javadev.teacher.TeacherRepository;

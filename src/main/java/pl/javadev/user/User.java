@@ -17,7 +17,7 @@ public class User {
     private String email;
     @Column(name = "password",nullable = false)
     private String password;
-    @Column(unique = true, nullable = false, length = 250)
+    @Column(unique = true, length = 250)
     private String indexNumber;
     @Column(name = "first_name")
     private String firstName;
@@ -35,6 +35,15 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private Set<UserRole> roles = new HashSet<>();
 
+
+    public User() {}
+
+    public User(String email, String password, String indexNumber) {
+        this.email = email;
+        this.password = password;
+        this.indexNumber = indexNumber;
+    }
+
     public void addRole(UserRole role) {
         this.roles.add(role);
     }
@@ -42,7 +51,6 @@ public class User {
     public void addLesson(Lesson lesson) {
         this.lessons.add(lesson);
     }
-
 
     public Long getId() {
         return id;

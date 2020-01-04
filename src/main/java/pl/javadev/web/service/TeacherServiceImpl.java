@@ -1,10 +1,14 @@
-package pl.javadev.teacher;
+package pl.javadev.web.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pl.javadev.exception.web.DuplicateIndexException;
+import pl.javadev.teacher.Teacher;
+import pl.javadev.teacher.TeacherDto;
+import pl.javadev.teacher.TeacherMapper;
+import pl.javadev.teacher.TeacherRepository;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +42,7 @@ public class TeacherServiceImpl implements TeacherService{
         return TeacherMapper.map(savedTeacher);
     }
 
-    public TeacherDto update(TeacherDto dto) {
+    public TeacherDto edit(TeacherDto dto) {
         Optional<Teacher> foundOne = teacherRepository.findById(dto.getId());
         foundOne.ifPresent(
                 u -> {

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -13,7 +14,7 @@ import pl.javadev.exception.other.ConflictPasswordException;
 import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.lesson.LessonDto;
 import pl.javadev.lesson.LessonRegistrationDto;
-import pl.javadev.lesson.LessonServiceImpl;
+import pl.javadev.web.service.LessonServiceImpl;
 import pl.javadev.teacher.TeacherDto;
 import pl.javadev.user.UserDto;
 
@@ -22,7 +23,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/lessons")
@@ -46,17 +49,7 @@ public class LessonResource {
     }
 
     @PostMapping("")
-    ResponseEntity<LessonDto> save(@RequestBody @Valid final LessonRegistrationDto dto, BindingResult result,
-                                 HttpServletResponse response) {
-        if (result.hasErrors()) {
-            List<FieldError> errors = result.getFieldErrors();
-            for (FieldError error : errors ) {
-                System.out.println (error.getObjectName() + " - " + error.getDefaultMessage());
-            }
-            createCookies(dto, response);
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Invalid data, please check it again.");
-        }
-
+    ResponseEntity<LessonDto> save(@RequestBody @Valid final LessonRegistrationDto dto) {
         if (dto.getId() != null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A lesson with existing id cannot be created.");
         LessonDto savedLessonDto = lessonServiceImpl.save(dto);
@@ -92,14 +85,7 @@ public class LessonResource {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<LessonDto> editLesson(@PathVariable Long id, @RequestBody @Valid LessonRegistrationDto dto, BindingResult result) {
-        if (result.hasErrors()) {
-            List<FieldError> errors = result.getFieldErrors();
-            for (FieldError error : errors ) {
-                System.out.println (error.getObjectName() + " - " + error.getDefaultMessage());
-            }
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Invalid data, please check it again.");
-        }
+    ResponseEntity<LessonDto> editLesson(@PathVariable Long id, @RequestBody @Valid LessonRegistrationDto dto) {
         LessonDto lessonDto = lessonServiceImpl.editLesson(id, dto);
         return ResponseEntity.ok(lessonDto);
     }
@@ -125,6 +111,19 @@ public class LessonResource {
         if (lessons.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no user in this database.");
         return ResponseEntity.ok(lessons);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 
     @ExceptionHandler({InvalidIdException.class})

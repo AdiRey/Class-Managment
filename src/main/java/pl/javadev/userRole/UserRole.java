@@ -22,6 +22,13 @@ public class UserRole implements Serializable {
     private List<User> users;
 
 
+    public UserRole() { }
+
+    public UserRole(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
     public Long getId() {
         return id;
     }

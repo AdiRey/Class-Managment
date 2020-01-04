@@ -5,18 +5,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pl.javadev.exception.other.ConflictIdException;
 import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.teacher.TeacherDto;
-import pl.javadev.teacher.TeacherServiceImpl;
-import pl.javadev.user.UserDto;
+import pl.javadev.web.service.TeacherServiceImpl;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/teachers")
@@ -43,14 +45,7 @@ public class TeacherResource {
     }
 
     @PostMapping("")
-    ResponseEntity<TeacherDto> save(@RequestBody @Valid TeacherDto dto, BindingResult result) {
-        if (result.hasErrors()) {
-            List<FieldError> errors = result.getFieldErrors();
-            for (FieldError error : errors ) {
-                System.out.println (error.getObjectName() + " - " + error.getDefaultMessage());
-            }
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Sprawdź poprawność wprowadzonych danych");
-        }
+    ResponseEntity<TeacherDto> save(@RequestBody @Valid TeacherDto dto) {
         if (dto.getId() != null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nie można utworzyć zajec które maja id");
         TeacherDto savedDto = teacherServiceImpl.save(dto);
@@ -73,14 +68,11 @@ public class TeacherResource {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<TeacherDto> editLesson(@PathVariable Long id, @RequestBody @Valid TeacherDto dto,
-                                        BindingResult result) {
-        if (result.hasErrors())
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Sprawdź poprawność wprowadzonych danych");
+    ResponseEntity<TeacherDto> editLesson(@PathVariable Long id, @RequestBody @Valid TeacherDto dto) {
         if (!id.equals(dto.getId()))
             throw new ResponseStatusException
                     (HttpStatus.BAD_REQUEST, "Aktualizowany obiekt musi mieć id zgodne z id w ścieżce zasobu");
-        TeacherDto teacherDto = teacherServiceImpl.update(dto);
+        TeacherDto teacherDto = teacherServiceImpl.edit(dto);
         return ResponseEntity.ok(teacherDto);
     }
     @DeleteMapping("")
@@ -99,6 +91,19 @@ public class TeacherResource {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 
     @ExceptionHandler({InvalidIdException.class})

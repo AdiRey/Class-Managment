@@ -1,7 +1,5 @@
-package pl.javadev.user;
+package pl.javadev.web.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,11 +9,15 @@ import pl.javadev.exception.other.ConflictPasswordException;
 import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.exception.web.DifferentPasswordException;
 import pl.javadev.exception.web.DuplicateEmailException;
+import pl.javadev.user.*;
 import pl.javadev.userRole.UserRole;
 import pl.javadev.userRole.UserRoleRepository;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -23,17 +25,12 @@ public class UserServiceImpl implements UserService{
     private UserRepository userRepository;
     private UserRoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
-        this.userRepository = userRepository;
+
+    public UserServiceImpl(UserMapper userMapper, UserRepository userRepository, UserRoleRepository roleRepository,
+                           PasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
-    }
-    @Autowired
-    public void setRoleRepository(UserRoleRepository roleRepository) {
+        this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-    }
-    @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -63,7 +60,7 @@ public class UserServiceImpl implements UserService{
                 throw new ConflictIdException();
             Optional<User> foundUser = userRepository.findById(id);
             User user = foundUser.get();
-            if (!user.getPassword().equals(passwordEncoder.encode(dto.getPassword())))
+            if (!passwordEncoder.matches(dto.getPassword(), user.getPassword()))
                 throw new ConflictPasswordException();
             UserDto deletedUserDto = userMapper.map(user);
             userRepository.delete(user);
@@ -82,14 +79,14 @@ public class UserServiceImpl implements UserService{
         return users;
     }
 
-    public Page<UserDto> findAllUsersUsingPaging(int numberOfPage, String sortText, String text) {
+    public List<UserDto> findAllUsersUsingPaging(int numberOfPage, String sortText, String text) {
         Sort sort;
         if (sortText.equals("DESC"))
             sort = Sort.by(new Sort.Order(Sort.Direction.DESC, "lastName"));
         else
             sort = Sort.by(new Sort.Order(Sort.Direction.ASC, "lastName"));
         return userRepository.findAllByLastNameContainingIgnoreCase
-                (text, PageRequest.of(numberOfPage, 20, sort)).map(userMapper::map);
+                (text, PageRequest.of(numberOfPage, 20, sort)).map(userMapper::map).getContent();
     }
 
     public UserDto findUser(Long id) {
@@ -128,7 +125,7 @@ public class UserServiceImpl implements UserService{
                 throw new DifferentPasswordException();
             Optional<User> foundUser = userRepository.findById(id);
             User user = foundUser.get();
-            assert !user.getPassword().equals(passwordEncoder.encode(dto.getOldPassword()));
+            assert !passwordEncoder.matches(dto.getOldPassword(), user.getPassword());
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
             return userMapper.map(user);
         } catch (NoSuchElementException e) {

@@ -64,4 +64,5 @@ public class UserEntityTest {
         User savedUser = entityManager.persistAndFlush(user);
         assertThat(savedUser.getPassword()).isEqualTo(user.getPassword());
     }
+
 }
