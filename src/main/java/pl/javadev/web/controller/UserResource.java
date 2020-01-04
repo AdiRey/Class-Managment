@@ -125,18 +125,4 @@ public class UserResource {
     public void handleConflictException() {
         throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
     }
-
-    private void createCookies(UserRegistrationDto dto, HttpServletResponse response) {
-        List<Cookie> cookies = new ArrayList<>(5);
-        cookies.add(new Cookie("email",dto.getEmail()));
-        cookies.add(new Cookie("firstName", dto.getFirstName()));
-        cookies.add(new Cookie("lastName", dto.getLastName()));
-        cookies.add(new Cookie("grade", dto.getGrade()));
-        cookies.add(new Cookie("major", dto.getMajor()));
-
-        for (Cookie cookie : cookies) {
-            cookie.setMaxAge(0);
-            response.addCookie(cookie);
-        }
-    }
 }
