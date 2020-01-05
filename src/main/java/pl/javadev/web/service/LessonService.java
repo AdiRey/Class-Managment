@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface LessonService {
     Page<LessonDto> findAllLessonsUsingPaging(int numberOfPage, String sortText, String text);
-    LessonDto addUsers(Long id, UserDto userDto);
+    LessonDto addUsers(Long id, Long userId);
     LessonDto addTeacher(Long id, TeacherDto teacherDto);
     LessonDto findLesson(Long id);
     LessonDto save(LessonRegistrationDto dto);

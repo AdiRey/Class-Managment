@@ -105,14 +105,4 @@ public class TeacherResource {
         });
         return errors;
     }
-
-    @ExceptionHandler({InvalidIdException.class})
-    public void handleInvalidException() {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher with that id doesn't exist.");
-    }
-
-    @ExceptionHandler({ConflictIdException.class})
-    public void handleConflictException() {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
-    }
 }

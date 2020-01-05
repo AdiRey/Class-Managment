@@ -1,5 +1,6 @@
 package pl.javadev.web.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -79,14 +80,14 @@ public class UserServiceImpl implements UserService{
         return users;
     }
 
-    public List<UserDto> findAllUsersUsingPaging(int numberOfPage, String sortText, String text) {
+    public Page<UserDto> findAllUsersUsingPaging(int numberOfPage, String sortText, String text) {
         Sort sort;
         if (sortText.equals("DESC"))
             sort = Sort.by(new Sort.Order(Sort.Direction.DESC, "lastName"));
         else
             sort = Sort.by(new Sort.Order(Sort.Direction.ASC, "lastName"));
         return userRepository.findAllByLastNameContainingIgnoreCase
-                (text, PageRequest.of(numberOfPage, 20, sort)).map(userMapper::map).getContent();
+                (text, PageRequest.of(numberOfPage, 20, sort)).map(userMapper::map);
     }
 
     public UserDto findUser(Long id) {
@@ -101,10 +102,19 @@ public class UserServiceImpl implements UserService{
     @Transactional
     public UserDto editUser(Long id, UserDto dto) {
         try {
+            if (dto.getId() == null)
+                throw new InvalidIdException();
             if (!id.equals(dto.getId()))
                 throw new ConflictIdException();
             Optional<User> foundUser = userRepository.findById(id);
             User user = foundUser.get();
+            if (!dto.getEmail().equals(user.getEmail())) {
+                Optional<User> foundUser2 = userRepository.findByEmail(dto.getEmail());
+                foundUser2.ifPresent(
+                        u -> {throw new DuplicateEmailException();
+                        }
+                );
+            }
             user.setFirstName(dto.getFirstName());
             user.setLastName(dto.getLastName());
             user.setEmail(dto.getEmail());
@@ -125,13 +135,12 @@ public class UserServiceImpl implements UserService{
                 throw new DifferentPasswordException();
             Optional<User> foundUser = userRepository.findById(id);
             User user = foundUser.get();
-            assert !passwordEncoder.matches(dto.getOldPassword(), user.getPassword());
+            if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword()))
+                throw new ConflictPasswordException();
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
             return userMapper.map(user);
         } catch (NoSuchElementException e) {
             throw new InvalidIdException();
-        } catch (AssertionError e) {
-            throw new ConflictPasswordException();
         }
     }
 

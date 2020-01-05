@@ -53,12 +53,16 @@ public class LessonServiceImpl implements LessonService{
     }
 
     @Transactional
-    public LessonDto addUsers(Long id, UserDto userDto) {
+    public LessonDto addUsers(Long id, Long userId) {
         try {
             Optional<Lesson> foundLesson = lessonRepository.findById(id);
             Lesson lesson = foundLesson.get();
-            Optional<User> foundUser = userRepository.findById(userDto.getId());
-            lesson.addUser(foundUser.get());
+            if (userId == null)
+                throw new InvalidIdException();
+            Optional<User> foundUser = userRepository.findById(userId);
+            User user = foundUser.get();
+            lesson.addUser(user);
+            user.addLesson(lesson);
             return LessonMapper.map(lesson);
         } catch (NoSuchElementException e) {
             throw new InvalidIdException();
@@ -104,10 +108,12 @@ public class LessonServiceImpl implements LessonService{
                 throw new ConflictIdException();
             Optional<Lesson> foundOne = lessonRepository.findById(dto.getId());
             Lesson lesson = foundOne.get();
-            lesson.setTitle(dto.getTitle());
-            lesson.setDescription(dto.getDescription());
-            lesson.setStart(dto.getStart());
-            lesson.setEnd(dto.getEnd());
+            if (!lesson.getStart().isBefore(LocalDateTime.now())) {
+                lesson.setTitle(dto.getTitle());
+                lesson.setDescription(dto.getDescription());
+                lesson.setStart(dto.getStart());
+                lesson.setEnd(dto.getEnd());
+            }
             return LessonMapper.map(lesson);
         } catch (NoSuchElementException e) {
             throw new InvalidIdException();
@@ -118,7 +124,7 @@ public class LessonServiceImpl implements LessonService{
         try {
             Optional<Lesson> foundLesson = lessonRepository.findById(id);
             Lesson lesson = foundLesson.get();
-            if (lesson.getStart().isBefore(LocalDateTime.now())) {
+            if (lesson.getEnd().isBefore(LocalDateTime.now())) {
                 LessonDto deletedOne = LessonMapper.map(lesson);
                 lessonRepository.delete(lesson);
                 return deletedOne;
@@ -133,9 +139,11 @@ public class LessonServiceImpl implements LessonService{
     public List<LessonDto> deleteAll() {
         List<LessonDto> lessons = new LinkedList<>();
         for (Lesson lesson : lessonRepository.findAll()) {
-            lessons.add(LessonMapper.map(lesson));
+            if (lesson.getEnd().isBefore(LocalDateTime.now())) {
+                lessons.add(LessonMapper.map(lesson));
+                lessonRepository.delete(lesson);
+            }
         }
-        userRepository.deleteAll();
         return lessons;
     }
 }

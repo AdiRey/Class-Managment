@@ -33,7 +33,7 @@ public class Lesson {
 
     public Lesson() {
     }
-    // for tests
+
     public Lesson(String title, String description, LocalDateTime start, LocalDateTime end) {
         this.title = title;
         this.description = description;
@@ -111,8 +111,7 @@ public class Lesson {
                 Objects.equals(description, lesson.description) &&
                 Objects.equals(start, lesson.start) &&
                 Objects.equals(end, lesson.end) &&
-                Objects.equals(teacher, lesson.teacher) &&
-                Objects.equals(users, lesson.users);
+                Objects.equals(teacher, lesson.teacher);
     }
 
     @Override

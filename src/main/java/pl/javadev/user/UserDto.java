@@ -1,15 +1,24 @@
 package pl.javadev.user;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
 public class UserDto {
     private Long id;
+    @Email
     private String email;
     private String indexNumber;
+    @NotEmpty
     private String firstName;
+    @NotEmpty
     private String lastName;
+    @NotEmpty
+    @Size(min = 9, max = 9)
     private String grade;
+    @NotEmpty
     private String major;
     private Set<String> roles = new HashSet<>();
 

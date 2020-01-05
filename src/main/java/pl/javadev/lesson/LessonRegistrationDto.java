@@ -1,6 +1,7 @@
 package pl.javadev.lesson;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public class LessonRegistrationDto {
@@ -9,9 +10,9 @@ public class LessonRegistrationDto {
     private String title;
     @NotEmpty
     private String description;
-    @NotEmpty
+    @NotNull
     private LocalDateTime start;
-    @NotEmpty
+    @NotNull
     private LocalDateTime end;
 
     public Long getId() {

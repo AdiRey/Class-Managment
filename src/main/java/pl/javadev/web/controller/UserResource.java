@@ -1,5 +1,6 @@
 package pl.javadev.web.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -16,11 +17,8 @@ import pl.javadev.user.UserPasswordDto;
 import pl.javadev.user.UserRegistrationDto;
 import pl.javadev.web.service.UserServiceImpl;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +57,10 @@ public class UserResource {
             return ResponseEntity.ok(userDto);
         } catch (ConflictPasswordException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Wrong password.");
+        } catch (InvalidIdException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+        } catch (ConflictIdException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
         }
     }
 
@@ -71,7 +73,7 @@ public class UserResource {
     }
 
     @GetMapping("")
-    List<UserDto> findUsers(@RequestParam(required = false, defaultValue = "0") final Integer page,
+    Page<UserDto> findUsers(@RequestParam(required = false, defaultValue = "0") final Integer page,
                             @RequestParam(required = false, defaultValue = "ASC") final String sort,
                             @RequestParam(required = false, defaultValue = "") final String filter) {
         return userServiceImpl.findAllUsersUsingPaging(page, sort, filter);
@@ -79,7 +81,11 @@ public class UserResource {
 
     @GetMapping("/{id}")
     UserDto findUserById(@PathVariable final Long id) {
-        return userServiceImpl.findUser(id);
+        try {
+            return userServiceImpl.findUser(id);
+        } catch (InvalidIdException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+        }
     }
 
     @PutMapping("")
@@ -89,8 +95,14 @@ public class UserResource {
 
     @PutMapping("/{id}")
     ResponseEntity<UserDto> editUser(@PathVariable final Long id, @RequestBody @Valid final UserDto dto) {
-        UserDto userDto = userServiceImpl.editUser(id, dto);
-        return ResponseEntity.ok(userDto);
+        try {
+            UserDto userDto = userServiceImpl.editUser(id, dto);
+            return ResponseEntity.ok(userDto);
+        } catch (InvalidIdException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+        } catch (ConflictIdException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
+        }
     }
 
     @PutMapping("/{id}/password")
@@ -100,6 +112,10 @@ public class UserResource {
             return ResponseEntity.ok(userDto);
         } catch (ConflictPasswordException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords don't match.");
+        } catch (InvalidIdException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+        } catch (ConflictIdException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
         }
     }
 
@@ -114,15 +130,5 @@ public class UserResource {
             errors.put(fieldName, errorMessage);
         });
         return errors;
-    }
-
-    @ExceptionHandler({InvalidIdException.class})
-    public void handleInvalidException() {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id doesn't exist.");
-    }
-
-    @ExceptionHandler({ConflictIdException.class})
-    public void handleConflictException() {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
     }
 }

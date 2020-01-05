@@ -1,5 +1,6 @@
 package pl.javadev.web.service;
 
+import org.springframework.data.domain.Page;
 import pl.javadev.user.UserDeleteDto;
 import pl.javadev.user.UserDto;
 import pl.javadev.user.UserPasswordDto;
@@ -11,7 +12,7 @@ public interface UserService {
     UserDto save(UserRegistrationDto dto);
     UserDto delete(Long id, UserDeleteDto dto);
     List<UserDto> deleteAll();
-    List<UserDto> findAllUsersUsingPaging(int numberOfPage, String sortText, String text);
+    Page<UserDto> findAllUsersUsingPaging(int numberOfPage, String sortText, String text);
     UserDto findUser(Long id);
     UserDto editUser(Long id, UserDto dto);
     UserDto editPassword(Long id, UserPasswordDto dto);
