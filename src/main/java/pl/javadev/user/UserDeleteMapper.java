@@ -3,8 +3,8 @@ package pl.javadev.user;
 public class UserDeleteMapper {
     public static User map(UserDeleteDto dto) {
         User user = new User();
-        user.setPassword(dto.getPassword());
         user.setId(dto.getId());
+        user.setPassword(dto.getPassword());
         return user;
     }
 

@@ -3,6 +3,7 @@ package pl.javadev.web.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +54,7 @@ public class UserResource {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     ResponseEntity<UserDto> delete(@PathVariable final Long id, @RequestBody @Valid final UserDeleteDto dto) {
         try {
             UserDto userDto = userServiceImpl.delete(id, dto);

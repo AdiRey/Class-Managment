@@ -57,11 +57,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                             user.getPassword(),
                             convertAuthorities(user.getRoles())
                     );
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null,
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getId(), user.getId(),
                 convertAuthorities(user.getRoles()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        System.out.println(authentication);
-        System.err.println("HAHAHAHAH");
         return userDetails;
     }
 
