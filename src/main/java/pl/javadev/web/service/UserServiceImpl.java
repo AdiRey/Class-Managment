@@ -102,8 +102,6 @@ public class UserServiceImpl implements UserService{
     @Transactional
     public UserDto editUser(Long id, UserDto dto) {
         try {
-            if (dto.getId() == null)
-                throw new InvalidIdException();
             if (!id.equals(dto.getId()))
                 throw new ConflictIdException();
             Optional<User> foundUser = userRepository.findById(id);
@@ -143,9 +141,4 @@ public class UserServiceImpl implements UserService{
             throw new InvalidIdException();
         }
     }
-
-    public UserDto findById(Long id) {
-        return userRepository.findById(id).map(userMapper::map).orElse(null);
-    }
-
 }

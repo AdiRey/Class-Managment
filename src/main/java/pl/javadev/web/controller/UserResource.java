@@ -44,10 +44,12 @@ public class UserResource {
 
     @PostMapping("/{id}")
     void savingUnderSpecifiedId(@PathVariable final Long id) {
-        UserDto user = userServiceImpl.findById(id);
-        if (user == null)
+        try {
+            userServiceImpl.findUser(id);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This id is already taken.");
+        } catch (InvalidIdException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id doesn't exist.");
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "This id is already taken.");
+        }
     }
 
     @DeleteMapping("/{id}")

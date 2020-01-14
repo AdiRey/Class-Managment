@@ -6,10 +6,10 @@ import pl.javadev.teacher.TeacherDto;
 import java.util.List;
 
 public interface TeacherService {
-    Page<TeacherDto> findAllTeachersUsingPaging(int numberOfPage, String sortText, String text);
-    TeacherDto findById(Long id);
     TeacherDto save(TeacherDto dto);
-    TeacherDto edit(TeacherDto dto);
+    Page<TeacherDto> findAllTeachersUsingPaging(int numberOfPage, String sortText, String text);
+    TeacherDto edit(Long id, TeacherDto dto);
     TeacherDto delete(Long id);
     List<TeacherDto> deleteAll();
+    TeacherDto findTeacher(Long id);
 }

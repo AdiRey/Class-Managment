@@ -15,3 +15,7 @@ where not exists (select * from lesson where id_lesson = 1);
 
 insert into user_roles(users_id_user, roles_id_role) select 1, 1
 where not exists (select * from user_roles where users_id_user = 1 and roles_id_role = 1);
+
+insert into teacher(id_teacher, first_name, last_name, email, degree)
+select 1, 'Maciej', 'Krasny', 'maciej.k@gmail.com', 'inżynier informatyki' where not exists (select * from teacher
+where id_teacher = 1);

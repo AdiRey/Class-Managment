@@ -4,14 +4,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import pl.javadev.exception.other.ConflictIdException;
+import pl.javadev.exception.other.InvalidIdException;
 import pl.javadev.exception.web.DuplicateIndexException;
 import pl.javadev.teacher.Teacher;
 import pl.javadev.teacher.TeacherDto;
 import pl.javadev.teacher.TeacherMapper;
 import pl.javadev.teacher.TeacherRepository;
 
+import javax.transaction.Transactional;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -32,9 +36,13 @@ public class TeacherServiceImpl implements TeacherService{
                 (text, PageRequest.of(numberOfPage, 20, sort)).map(TeacherMapper::map);
     }
 
-    public TeacherDto findById(Long id) {
-        Optional<Teacher> teacher = teacherRepository.findById(id);
-        return teacher.map(TeacherMapper::map).orElse(null);
+    public TeacherDto findTeacher(Long id) {
+        try {
+            Teacher teacher = teacherRepository.findById(id).get();
+            return TeacherMapper.map(teacher);
+        } catch (NoSuchElementException e) {
+            throw new InvalidIdException();
+        }
     }
 
     public TeacherDto save(TeacherDto dto) {
@@ -42,26 +50,31 @@ public class TeacherServiceImpl implements TeacherService{
         return TeacherMapper.map(savedTeacher);
     }
 
-    public TeacherDto edit(TeacherDto dto) {
-        Optional<Teacher> foundOne = teacherRepository.findById(dto.getId());
-        foundOne.ifPresent(
-                u -> {
-                    if (!u.getId().equals(dto.getId()))
-                        throw new DuplicateIndexException("To nie to id!");
-                });
-        Teacher savedTeacher = teacherRepository.save(TeacherMapper.map(dto));
-        return TeacherMapper.map(savedTeacher);
+    @Transactional
+    public TeacherDto edit(Long id, TeacherDto dto) {
+        try {
+            if (!id.equals(dto.getId()))
+                throw new ConflictIdException();
+            Teacher teacher = teacherRepository.findById(dto.getId()).get();
+            teacher.setFirstName(dto.getFirstName());
+            teacher.setLastName(dto.getLastName());
+            teacher.setEmail(dto.getEmail());
+            teacher.setDegree(dto.getDegree());
+            return TeacherMapper.map(teacher);
+        } catch (NoSuchElementException e) {
+            throw new InvalidIdException();
+        }
     }
 
     public TeacherDto delete(Long id) {
-        TeacherDto deletedOne = null;
-        Optional<Teacher> foundOne = teacherRepository.findById(id);
-        if (foundOne.isPresent()) {
-            Teacher teacher = foundOne.get();
-            deletedOne = TeacherMapper.map(teacher);
+        try {
+            Teacher teacher = teacherRepository.findById(id).get();
+            TeacherDto deletedTeacher = TeacherMapper.map(teacher);
             teacherRepository.delete(teacher);
+            return deletedTeacher;
+        } catch (NoSuchElementException e) {
+            throw new InvalidIdException();
         }
-        return deletedOne;
     }
 
     public List<TeacherDto> deleteAll() {

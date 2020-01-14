@@ -3,7 +3,6 @@ package pl.javadev.web.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/teachers")
+@RequestMapping("/teacher")
 public class TeacherResource {
     private TeacherServiceImpl teacherServiceImpl;
 
@@ -37,17 +36,19 @@ public class TeacherResource {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<TeacherDto> findLesson(@PathVariable Long id) {
-        TeacherDto dto = teacherServiceImpl.findById(id);
-        if (dto == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        return ResponseEntity.ok(dto);
+    TeacherDto findTeacherById(@PathVariable Long id) {
+        try {
+            return teacherServiceImpl.findTeacher(id);
+        } catch (InvalidIdException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+        }
+
     }
 
     @PostMapping("")
     ResponseEntity<TeacherDto> save(@RequestBody @Valid TeacherDto dto) {
         if (dto.getId() != null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nie można utworzyć zajec które maja id");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot add teacher with existing id.");
         TeacherDto savedDto = teacherServiceImpl.save(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(savedDto.getId()).toUri();
@@ -56,10 +57,12 @@ public class TeacherResource {
 
     @PostMapping("/{id}")
     void savingSpecifyId(@PathVariable Long id) {
-        TeacherDto dto = teacherServiceImpl.findById(id);
-        if (dto == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        throw new ResponseStatusException(HttpStatus.CONFLICT);
+        try {
+            teacherServiceImpl.findTeacher(id);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This id is already taken.");
+        } catch (InvalidIdException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id doesn't exist.");
+        }
     }
 
     @PutMapping("")
@@ -68,12 +71,15 @@ public class TeacherResource {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<TeacherDto> editLesson(@PathVariable Long id, @RequestBody @Valid TeacherDto dto) {
-        if (!id.equals(dto.getId()))
-            throw new ResponseStatusException
-                    (HttpStatus.BAD_REQUEST, "Aktualizowany obiekt musi mieć id zgodne z id w ścieżce zasobu");
-        TeacherDto teacherDto = teacherServiceImpl.edit(dto);
-        return ResponseEntity.ok(teacherDto);
+    ResponseEntity<TeacherDto> editTeacher(@PathVariable Long id, @RequestBody @Valid TeacherDto dto) {
+        try {
+            TeacherDto teacherDto = teacherServiceImpl.edit(id, dto);
+            return ResponseEntity.ok(teacherDto);
+        } catch (InvalidIdException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+        } catch (ConflictIdException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
+        }
     }
     @DeleteMapping("")
     ResponseEntity<List<TeacherDto>> deleteAll() {
@@ -85,11 +91,11 @@ public class TeacherResource {
 
     @DeleteMapping("/{id}")
     ResponseEntity<TeacherDto> delete(@PathVariable Long id) {
-        TeacherDto teacherDto = teacherServiceImpl.delete(id);
-        if (teacherDto != null) {
+        try {
+            TeacherDto teacherDto = teacherServiceImpl.delete(id);
             return ResponseEntity.ok(teacherDto);
-        } else {
-            return ResponseEntity.notFound().build();
+        } catch (InvalidIdException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
         }
     }
 

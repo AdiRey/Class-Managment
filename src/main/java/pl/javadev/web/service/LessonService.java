@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import pl.javadev.lesson.LessonDto;
 import pl.javadev.lesson.LessonRegistrationDto;
 import pl.javadev.teacher.TeacherDto;
-import pl.javadev.user.UserDto;
 
 import java.util.List;
 
