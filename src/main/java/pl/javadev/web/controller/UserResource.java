@@ -3,6 +3,7 @@ package pl.javadev.web.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -44,6 +45,7 @@ public class UserResource {
     }
 
     @PostMapping("/{id}")
+    @PreAuthorize("hasAnyRole({'ROLE_ADMIN', 'ROLE_USER'})")
     void savingUnderSpecifiedId(@PathVariable final Long id) {
         try {
             userServiceImpl.findUser(id);
@@ -54,7 +56,8 @@ public class UserResource {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("(#dto.email.equals(principal.username) or #dto.indexNumber" +
+            ".equals(principal.username) or hasRole('ROLE_ADMIN'))")
     ResponseEntity<UserDto> delete(@PathVariable final Long id, @RequestBody @Valid final UserDeleteDto dto) {
         try {
             UserDto userDto = userServiceImpl.delete(id, dto);
@@ -68,7 +71,8 @@ public class UserResource {
         }
     }
 
-    @DeleteMapping("") // only for owner TODO add a new role "OWNER"
+    @DeleteMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     ResponseEntity<List<UserDto>> deleteAll() {
         List<UserDto> users = userServiceImpl.deleteAll();
         if (users.isEmpty())
@@ -77,6 +81,7 @@ public class UserResource {
     }
 
     @GetMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     Page<UserDto> findUsers(@RequestParam(required = false, defaultValue = "0") final Integer page,
                             @RequestParam(required = false, defaultValue = "ASC") final String sort,
                             @RequestParam(required = false, defaultValue = "") final String filter) {
@@ -84,6 +89,8 @@ public class UserResource {
     }
 
     @GetMapping("/{id}")
+    @PostAuthorize("(returnObject.email.equals(principal.username) or returnObject.indexNumber" +
+            ".equals(principal.username) or hasRole('ROLE_ADMIN'))")
     UserDto findUserById(@PathVariable final Long id) {
         try {
             return userServiceImpl.findUser(id);
@@ -93,11 +100,14 @@ public class UserResource {
     }
 
     @PutMapping("")
+    @PreAuthorize("hasAnyRole({'ROLE_ADMIN', 'ROLE_USER'})")
     void edit() {
         throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("(#dto.email.equals(principal.username) or #dto.indexNumber" +
+            ".equals(principal.username) or hasRole('ROLE_ADMIN'))")
     ResponseEntity<UserDto> editUser(@PathVariable final Long id, @RequestBody @Valid final UserDto dto) {
         try {
             UserDto userDto = userServiceImpl.editUser(id, dto);
@@ -110,6 +120,8 @@ public class UserResource {
     }
 
     @PutMapping("/{id}/password")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or #dto.email.equals(principal.username) or #dto.indexNumber.equals" +
+            "(principal.username)")
     ResponseEntity<UserDto> editUserPassword(@PathVariable final Long id, @RequestBody @Valid final UserPasswordDto dto) {
         try {
             UserDto userDto = userServiceImpl.editPassword(id, dto);

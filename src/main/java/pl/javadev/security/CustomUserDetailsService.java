@@ -1,11 +1,8 @@
 package pl.javadev.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -57,9 +54,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                             user.getPassword(),
                             convertAuthorities(user.getRoles())
                     );
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getId(), user.getId(),
-                convertAuthorities(user.getRoles()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         return userDetails;
     }
 

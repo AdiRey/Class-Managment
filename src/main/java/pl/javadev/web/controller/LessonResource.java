@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,7 @@ public class LessonResource {
     }
 
     @GetMapping("")
+    @PreAuthorize("hasAnyRole({'ROLE_ADMIN', 'ROLE_USER'})")
     Page<LessonDto> findLessons(@RequestParam(required = false, defaultValue = "0") final Integer page,
                                 @RequestParam(required = false, defaultValue = "ASC") final String sort,
                                 @RequestParam(required = false, defaultValue = "") final String filter) {
@@ -41,6 +43,7 @@ public class LessonResource {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole({'ROLE_ADMIN', 'ROLE_USER'})")
     LessonDto findLessonById(@PathVariable final Long id) {
         try {
             return lessonServiceImpl.findLesson(id);
@@ -50,6 +53,7 @@ public class LessonResource {
    }
 
     @PostMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     ResponseEntity<LessonDto> save(@RequestBody @Valid final LessonRegistrationDto dto) {
         if (dto.getId() != null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A lesson with existing id cannot be created.");
@@ -60,6 +64,7 @@ public class LessonResource {
     }
 
     @PostMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     void savingUnderSpecifiedId(@PathVariable final Long id) {
         LessonDto lessonDto = lessonServiceImpl.findById(id);
         if (lessonDto == null)
@@ -68,9 +73,11 @@ public class LessonResource {
     }
 
     @PostMapping("/{id}/addU")
-    ResponseEntity<LessonDto> addUserToLesson(@PathVariable Long id, @RequestParam Long userId) {
+    @PreAuthorize("(#dto.email.equals(principal.username) or #dto.indexNumber" +
+            ".equals(principal.username) or hasRole('ROLE_ADMIN'))")
+    ResponseEntity<LessonDto> addUserToLesson(@PathVariable Long id, @RequestParam UserDto dto) {
         try {
-            LessonDto lessonDto = lessonServiceImpl.addUsers(id, userId);
+            LessonDto lessonDto = lessonServiceImpl.addUsers(id, dto.getId());
             return ResponseEntity.ok(lessonDto);
         } catch (InvalidIdException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
@@ -78,6 +85,7 @@ public class LessonResource {
     }
 
     @PostMapping("/{id}/addT")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     ResponseEntity<LessonDto> addTeacherToLesson(@PathVariable Long id, @RequestBody TeacherDto dto) {
         try {
             LessonDto lessonDto = lessonServiceImpl.addTeacher(id, dto);
@@ -88,6 +96,7 @@ public class LessonResource {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     ResponseEntity<LessonDto> editLesson(@PathVariable Long id, @RequestBody @Valid LessonRegistrationDto dto) {
         try {
             LessonDto lessonDto = lessonServiceImpl.editLesson(id, dto);
@@ -100,11 +109,13 @@ public class LessonResource {
     }
 
     @PutMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     void edit() {
         throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     ResponseEntity<LessonDto> delete(@PathVariable final Long id) {
         try {
             LessonDto dto = lessonServiceImpl.delete(id);
@@ -118,6 +129,7 @@ public class LessonResource {
     }
 
     @DeleteMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     ResponseEntity<List<LessonDto>> deleteAll() {
         List<LessonDto> lessons = lessonServiceImpl.deleteAll();
         if (lessons.isEmpty())

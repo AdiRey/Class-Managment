@@ -5,6 +5,8 @@ import javax.validation.constraints.Size;
 
 public class UserPasswordDto {
     private Long id;
+    private String email;
+    private String indexNumber;
     @Size(min = 6)
     @NotEmpty
     private String oldPassword;
@@ -21,6 +23,22 @@ public class UserPasswordDto {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getIndexNumber() {
+        return indexNumber;
+    }
+
+    public void setIndexNumber(String indexNumber) {
+        this.indexNumber = indexNumber;
     }
 
     public String getOldPassword() {
