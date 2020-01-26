@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserResource {
     private UserServiceImpl userServiceImpl;
 
@@ -36,6 +36,7 @@ public class UserResource {
 
     @PostMapping("")
     ResponseEntity<UserDto> save(@RequestBody @Valid final UserRegistrationDto dto) {
+        System.out.println("save");
         if (dto.getId() != null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An account with existing id cannot be created.");
         UserDto savedUserDto = userServiceImpl.save(dto);
@@ -48,6 +49,7 @@ public class UserResource {
     @PreAuthorize("hasAnyRole({'ROLE_ADMIN', 'ROLE_USER'})")
     void savingUnderSpecifiedId(@PathVariable final Long id) {
         try {
+            System.out.println("savingUnder");
             userServiceImpl.findUser(id);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This id is already taken.");
         } catch (InvalidIdException e) {
@@ -60,12 +62,13 @@ public class UserResource {
             ".equals(principal.username) or hasRole('ROLE_ADMIN'))")
     ResponseEntity<UserDto> delete(@PathVariable final Long id, @RequestBody @Valid final UserDeleteDto dto) {
         try {
+            System.out.println("delete");
             UserDto userDto = userServiceImpl.delete(id, dto);
             return ResponseEntity.ok(userDto);
         } catch (ConflictPasswordException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Wrong password.");
         } catch (InvalidIdException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id doesn't exist.");
         } catch (ConflictIdException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
         }
@@ -74,6 +77,7 @@ public class UserResource {
     @DeleteMapping("")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     ResponseEntity<List<UserDto>> deleteAll() {
+        System.out.println("deleteAll");
         List<UserDto> users = userServiceImpl.deleteAll();
         if (users.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no user in this database.");
@@ -85,6 +89,7 @@ public class UserResource {
     Page<UserDto> findUsers(@RequestParam(required = false, defaultValue = "0") final Integer page,
                             @RequestParam(required = false, defaultValue = "ASC") final String sort,
                             @RequestParam(required = false, defaultValue = "") final String filter) {
+        System.out.println("findUsers");
         return userServiceImpl.findAllUsersUsingPaging(page, sort, filter);
     }
 
@@ -93,15 +98,17 @@ public class UserResource {
             ".equals(principal.username) or hasRole('ROLE_ADMIN'))")
     UserDto findUserById(@PathVariable final Long id) {
         try {
+            System.out.println("findUserBy");
             return userServiceImpl.findUser(id);
         } catch (InvalidIdException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id doesn't exist.");
         }
     }
 
     @PutMapping("")
     @PreAuthorize("hasAnyRole({'ROLE_ADMIN', 'ROLE_USER'})")
     void edit() {
+        System.out.println("edit");
         throw new ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
@@ -110,10 +117,11 @@ public class UserResource {
             ".equals(principal.username) or hasRole('ROLE_ADMIN'))")
     ResponseEntity<UserDto> editUser(@PathVariable final Long id, @RequestBody @Valid final UserDto dto) {
         try {
+            System.out.println("editUser");
             UserDto userDto = userServiceImpl.editUser(id, dto);
             return ResponseEntity.ok(userDto);
         } catch (InvalidIdException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id doesn't exist.");
         } catch (ConflictIdException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
         }
@@ -124,12 +132,13 @@ public class UserResource {
             "(principal.username)")
     ResponseEntity<UserDto> editUserPassword(@PathVariable final Long id, @RequestBody @Valid final UserPasswordDto dto) {
         try {
+            System.out.println("editUserPassword");
             UserDto userDto = userServiceImpl.editPassword(id, dto);
             return ResponseEntity.ok(userDto);
         } catch (ConflictPasswordException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords don't match.");
         } catch (InvalidIdException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Object with that id doesn't exist.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id doesn't exist.");
         } catch (ConflictIdException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Id doesn't match.");
         }

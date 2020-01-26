@@ -14,7 +14,6 @@ import pl.javadev.teacher.TeacherDto;
 import pl.javadev.teacher.TeacherRepository;
 import pl.javadev.user.User;
 import pl.javadev.user.UserRepository;
-import pl.javadev.user.UserDto;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -29,16 +28,9 @@ public class LessonServiceImpl implements LessonService{
     private UserRepository userRepository;
     private TeacherRepository teacherRepository;
 
-    public LessonServiceImpl(LessonRepository lessonRepository) {
+    public LessonServiceImpl(LessonRepository lessonRepository, UserRepository userRepository, TeacherRepository teacherRepository) {
         this.lessonRepository = lessonRepository;
-    }
-
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
-    }
-    @Autowired
-    public void setTeacherRepository(TeacherRepository teacherRepository) {
         this.teacherRepository = teacherRepository;
     }
 
@@ -124,7 +116,7 @@ public class LessonServiceImpl implements LessonService{
         try {
             Optional<Lesson> foundLesson = lessonRepository.findById(id);
             Lesson lesson = foundLesson.get();
-            if (lesson.getEnd().isBefore(LocalDateTime.now())) {
+            if (lesson.getStart().isAfter(LocalDateTime.now())) {
                 LessonDto deletedOne = LessonMapper.map(lesson);
                 lessonRepository.delete(lesson);
                 return deletedOne;
@@ -139,7 +131,7 @@ public class LessonServiceImpl implements LessonService{
     public List<LessonDto> deleteAll() {
         List<LessonDto> lessons = new LinkedList<>();
         for (Lesson lesson : lessonRepository.findAll()) {
-            if (lesson.getEnd().isBefore(LocalDateTime.now())) {
+            if (lesson.getStart().isAfter(LocalDateTime.now())) {
                 lessons.add(LessonMapper.map(lesson));
                 lessonRepository.delete(lesson);
             }

@@ -6,11 +6,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit4.SpringRunner;
 import pl.javadev.user.*;
 import pl.javadev.userRole.UserRole;
 import pl.javadev.userRole.UserRoleRepository;
@@ -20,20 +21,20 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
     private User user;
 
     @InjectMocks
     private UserServiceImpl userService;
     @Mock
-    private UserMapper userMapper;
-    @Mock
     private UserRepository userRepository;
     @Mock
     private UserRoleRepository roleRepository;
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private UserMapper userMapper;
+    @Mock
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Before
     public void setUp() {
@@ -50,8 +51,11 @@ public class UserServiceTest {
         UserRegistrationDto dto = UserRegistrationMapper.map(user);
         dto.setRepeatedPassword("qwerty123");
 
-        when(roleRepository.findByName("USER_ROLE")).thenReturn(new UserRole("USER_ROLE", "xd"));
+        when(userRepository.findByEmail(dto.getEmail())).thenReturn(Optional.empty());
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(new UserRole("ROLE_USER", "xd"));
         when(passwordEncoder.encode(user.getPassword())).thenReturn("******");
+        when(userRepository.lastIndexNumber()).thenReturn(10);
+        when(userRepository.save(user)).thenReturn(user);
 
         userService.save(dto);
         verify(userRepository).save(any(User.class));
@@ -62,7 +66,7 @@ public class UserServiceTest {
         user.setId(1L);
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(passwordEncoder.encode(user.getPassword())).thenReturn("qwerty123");
+        when(passwordEncoder.matches(user.getPassword(), user.getPassword())).thenReturn(true);
 
         userService.delete(1L, UserDeleteMapper.map(user));
         verify(userRepository).delete(any(User.class));
@@ -79,28 +83,26 @@ public class UserServiceTest {
 
     @Test
     public void findAllUsersUsingPaging() {
-        when(userRepository.findAllByLastNameContainingIgnoreCase(user.getLastName(), PageRequest.of(0,20,
-                Sort.by(new Sort.Order(Sort.Direction.ASC,"x")))))
-                .thenReturn(Page.empty());
-        when(roleRepository.findByName(user.getLastName())).thenReturn(null);
+        Sort sort = Sort.by(new Sort.Order(Sort.Direction.ASC, "lastName"));
+        int numberOfPage = 0;
+        String sortText = "ASC";
+        String text = "";
 
-        userService.findAllUsersUsingPaging(0, "ASC", "xyz");
-        verify(userRepository).findAllByLastNameContainingIgnoreCase(user.getLastName(), PageRequest.of(0, 20));
+        when(userRepository.findAllByLastNameContainingIgnoreCase
+                (text, PageRequest.of(numberOfPage, 20, sort)))
+                .thenReturn(Page.empty());
+
+        userService.findAllUsersUsingPaging(numberOfPage, sortText, text);
+        verify(userRepository).findAllByLastNameContainingIgnoreCase(text, PageRequest.of(numberOfPage,
+                20, sort));
     }
 
     @Test
     public void findUser() {
-    }
+        Long id = 1L;
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
 
-    @Test
-    public void editUser() {
-    }
-
-    @Test
-    public void editPassword() {
-    }
-
-    @Test
-    public void findById() {
+        userService.findUser(id);
+        verify(userRepository).findById(id);
     }
 }

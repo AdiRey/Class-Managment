@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService{
 
     @Transactional
     public UserDto save(UserRegistrationDto dto) {
+        System.out.println("save");
         Optional<User> foundUser = userRepository.findByEmail(dto.getEmail());
         foundUser.ifPresent(
                 u -> {throw new DuplicateEmailException();
@@ -56,6 +57,7 @@ public class UserServiceImpl implements UserService{
     }
 
     public UserDto delete(Long id, UserDeleteDto dto) {
+        System.out.println("save");
         try {
             if (!id.equals(dto.getId()))
                 throw new ConflictIdException();
@@ -72,6 +74,7 @@ public class UserServiceImpl implements UserService{
     }
 
     public List<UserDto> deleteAll() {
+        System.out.println("save");
         List<UserDto> users = new LinkedList<>();
         for (User user : userRepository.findAll()) {
             users.add(userMapper.map(user));
@@ -81,16 +84,21 @@ public class UserServiceImpl implements UserService{
     }
 
     public Page<UserDto> findAllUsersUsingPaging(int numberOfPage, String sortText, String text) {
+        System.out.println("save");
         Sort sort;
         if (sortText.equals("DESC"))
             sort = Sort.by(new Sort.Order(Sort.Direction.DESC, "lastName"));
         else
             sort = Sort.by(new Sort.Order(Sort.Direction.ASC, "lastName"));
-        return userRepository.findAllByLastNameContainingIgnoreCase
-                (text, PageRequest.of(numberOfPage, 20, sort)).map(userMapper::map);
+        Page<User> users = userRepository.findAllByLastNameContainingIgnoreCase
+                (text, PageRequest.of(numberOfPage, 20, sort));
+        if (users.isEmpty())
+            return Page.empty();
+        return users.map(userMapper::map);
     }
 
     public UserDto findUser(Long id) {
+        System.out.println("save");
         try {
             Optional<User> foundUser = userRepository.findById(id);
             return userMapper.map(foundUser.get());
@@ -101,6 +109,7 @@ public class UserServiceImpl implements UserService{
 
     @Transactional
     public UserDto editUser(Long id, UserDto dto) {
+        System.out.println("save");
         try {
             if (!id.equals(dto.getId()))
                 throw new ConflictIdException();
@@ -126,6 +135,7 @@ public class UserServiceImpl implements UserService{
 
     @Transactional
     public UserDto editPassword(Long id, UserPasswordDto dto) {
+        System.out.println("save");
         try {
             if (!id.equals(dto.getId()))
                 throw new ConflictIdException();

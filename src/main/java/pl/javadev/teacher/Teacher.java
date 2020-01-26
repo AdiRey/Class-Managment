@@ -24,6 +24,15 @@ public class Teacher{
     @OneToMany(mappedBy = "teacher")
     private List<Lesson> lessons;
 
+    public Teacher() {
+    }
+
+    public Teacher(String firstName, String lastName, String degree, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.degree = degree;
+        this.email = email;
+    }
 
     public Long getId() {
         return id;

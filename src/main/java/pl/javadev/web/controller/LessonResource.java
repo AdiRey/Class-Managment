@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/lessons")
+@RequestMapping("/api/lessons")
 public class LessonResource {
     private LessonServiceImpl lessonServiceImpl;
 
