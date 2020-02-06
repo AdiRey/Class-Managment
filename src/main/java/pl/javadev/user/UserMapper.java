@@ -1,60 +1,47 @@
 package pl.javadev.user;
 
-import pl.javadev.userRole.UserRoleMapper;
+import org.springframework.stereotype.Component;
+import pl.javadev.userRole.UserRole;
+import pl.javadev.userRole.UserRoleRepository;
 
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 public class UserMapper {
-    public static UserDto entityToDto(User user) {
+    private UserRoleRepository userRoleRepository;
+
+    public UserMapper(UserRoleRepository userRoleRepository) {
+        this.userRoleRepository = userRoleRepository;
+    }
+
+    public UserDto map(User user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setIndexNumber(user.getIndexNumber());
-        dto.setYear(user.getYear());
+        dto.setGrade(user.getGrade());
         dto.setMajor(user.getMajor());
-        dto.setRoles(user.getRoles().stream().map(UserRoleMapper::entityToDto).collect(Collectors.toSet()));
+        dto.setRoles(user.getRoles().stream().map(UserRole::getName).collect(Collectors.toSet()));
         return dto;
     }
 
-    public static User dtoToEntity(UserDto dto) {
+    public User map(UserDto dto) {
         User user = new User();
         user.setId(dto.getId());
         user.setEmail(dto.getEmail());
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setIndexNumber(dto.getIndexNumber());
-        user.setYear(dto.getYear());
+        user.setGrade(dto.getGrade());
         user.setMajor(dto.getMajor());
-        user.setRoles(dto.getRoles().stream().map(UserRoleMapper::dtoToEntity).collect(Collectors.toSet()));
+        Set<UserRole> roles = new HashSet<>();
+        for (String role : dto.getRoles()) {
+            roles.add(userRoleRepository.findByName(role));
+        }
+        user.setRoles(roles);
         return user;
     }
-
-    public static UserDtoReg entityToDtoReg(User user) {
-        UserDtoReg dto = new UserDtoReg();
-        dto.setId(user.getId());
-        dto.setEmail(user.getEmail());
-        dto.setPassword(user.getPassword());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        dto.setIndexNumber(user.getIndexNumber());
-        dto.setYear(user.getYear());
-        dto.setMajor(user.getMajor());
-        return dto;
-    }
-
-    public static User dtoRegToEntity(UserDtoReg dtoReg) {
-        User user = new User();
-        user.setId(dtoReg.getId());
-        user.setEmail(dtoReg.getEmail());
-        user.setPassword(dtoReg.getPassword());
-        user.setFirstName(dtoReg.getFirstName());
-        user.setLastName(dtoReg.getLastName());
-        user.setIndexNumber(dtoReg.getIndexNumber());
-        user.setYear(dtoReg.getYear());
-        user.setMajor(dtoReg.getMajor());
-        return user;
-    }
-
 }

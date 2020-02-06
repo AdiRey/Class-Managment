@@ -1,44 +1,44 @@
 package pl.javadev.lesson;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import pl.javadev.teacher.Teacher;
 import pl.javadev.user.User;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
-public class Lesson implements Serializable {
+@Table(name = "lesson")
+public class Lesson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "lesson_id")
+    @Column(name = "id_lesson")
     private Long id;
-    @Column(nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
-    @Column(nullable = false)
+    @Lob
+    @Column(name = "description", nullable = false)
     private String description;
-    @Column(nullable = false)
-    private Timestamp start;
-    @Column(nullable = false)
-    private Timestamp end;
-    @ManyToOne
-    @JoinColumn(name = "id_teacher")
+    @Column(name = "start", nullable = false)
+    private LocalDateTime start;
+    @Column(name = "end", nullable = false)
+    private LocalDateTime end;
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "teacher_id")
     private Teacher teacher;
-    @ManyToMany(mappedBy = "lessons", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToMany(mappedBy = "lessons")
     private List<User> users = new ArrayList<>();
 
-    Lesson() {}
+    public Lesson() {
+    }
 
-    public Lesson(String title, String description, Timestamp start, Timestamp end, Teacher teacher) {
+    public Lesson(String title, String description, LocalDateTime start, LocalDateTime end) {
         this.title = title;
         this.description = description;
         this.start = start;
         this.end = end;
-        this.teacher = teacher;
     }
 
     public void addUser(User user) {
@@ -69,19 +69,19 @@ public class Lesson implements Serializable {
         this.description = description;
     }
 
-    public Timestamp getStart() {
+    public LocalDateTime getStart() {
         return start;
     }
 
-    public void setStart(Timestamp start) {
+    public void setStart(LocalDateTime start) {
         this.start = start;
     }
 
-    public Timestamp getEnd() {
+    public LocalDateTime getEnd() {
         return end;
     }
 
-    public void setEnd(Timestamp end) {
+    public void setEnd(LocalDateTime end) {
         this.end = end;
     }
 
@@ -102,15 +102,20 @@ public class Lesson implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "Lesson{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", start=" + start +
-                ", end=" + end +
-                ", teacher=" + teacher +
-                ", users.size=" + users.size() +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Lesson)) return false;
+        Lesson lesson = (Lesson) o;
+        return Objects.equals(id, lesson.id) &&
+                Objects.equals(title, lesson.title) &&
+                Objects.equals(description, lesson.description) &&
+                Objects.equals(start, lesson.start) &&
+                Objects.equals(end, lesson.end) &&
+                Objects.equals(teacher, lesson.teacher);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, description, start, end, teacher, users);
     }
 }

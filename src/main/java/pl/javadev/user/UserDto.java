@@ -1,20 +1,26 @@
 package pl.javadev.user;
 
-import pl.javadev.userRole.UserRole;
-import pl.javadev.userRole.UserRoleDto;
-
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
 public class UserDto {
     private Long id;
+    @Email
     private String email;
     private String indexNumber;
+    @NotEmpty
     private String firstName;
+    @NotEmpty
     private String lastName;
-    private String year;
+    @NotEmpty
+    @Size(min = 9, max = 9)
+    private String grade;
+    @NotEmpty
     private String major;
-    private Set<UserRoleDto> roles = new HashSet<>();
+    private Set<String> roles = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -56,12 +62,12 @@ public class UserDto {
         this.lastName = lastName;
     }
 
-    public String getYear() {
-        return year;
+    public String getGrade() {
+        return grade;
     }
 
-    public void setYear(String year) {
-        this.year = year;
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 
     public String getMajor() {
@@ -72,11 +78,11 @@ public class UserDto {
         this.major = major;
     }
 
-    public Set<UserRoleDto> getRoles() {
+    public Set<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<UserRoleDto> roles) {
+    public void setRoles(Set<String> roles) {
         this.roles = roles;
     }
 }

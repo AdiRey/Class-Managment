@@ -1,12 +1,18 @@
 package pl.javadev.lesson;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-public class LessonDto {
+public class LessonRegistrationDto {
     private Long id;
+    @NotEmpty
     private String title;
+    @NotEmpty
     private String description;
+    @NotNull
     private LocalDateTime start;
+    @NotNull
     private LocalDateTime end;
 
     public Long getId() {

@@ -12,12 +12,22 @@ import java.util.Objects;
 public class UserRole implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
+    @Column(name = "id_role")
     private Long id;
-    private String role;
+    @Column(name = "name")
+    private String name;
+    @Column(name = "description")
     private String description;
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "roles")
     private List<User> users;
+
+
+    public UserRole() { }
+
+    public UserRole(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 
     public Long getId() {
         return id;
@@ -27,12 +37,12 @@ public class UserRole implements Serializable {
         this.id = id;
     }
 
-    public String getRole() {
-        return role;
+    public String getName() {
+        return name;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setName(String role) {
+        this.name = role;
     }
 
     public String getDescription() {
@@ -55,7 +65,7 @@ public class UserRole implements Serializable {
     public String toString() {
         return "UserRole{" +
                 "id=" + id +
-                ", role='" + role + '\'' +
+                ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }
@@ -66,12 +76,12 @@ public class UserRole implements Serializable {
         if (!(o instanceof UserRole)) return false;
         UserRole role1 = (UserRole) o;
         return Objects.equals(id, role1.id) &&
-                Objects.equals(role, role1.role) &&
+                Objects.equals(name, role1.name) &&
                 Objects.equals(description, role1.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, role, description);
+        return Objects.hash(id, name, description);
     }
 }

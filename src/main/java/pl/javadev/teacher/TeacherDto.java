@@ -1,8 +1,12 @@
 package pl.javadev.teacher;
 
+import javax.validation.constraints.NotEmpty;
+
 public class TeacherDto {
     private Long id;
+    @NotEmpty
     private String firstName;
+    @NotEmpty
     private String lastName;
     private String degree;
     private String email;
