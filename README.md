@@ -8,8 +8,8 @@ Simple app to manage the Javadev lessons.
 - Two options to log-in for users: using index or email address
 - Pagination of students teachers and classes lists
 - Data validation
-- Basic unit tests checking the correct operation of repositories and services (todo in near future: adding tests for controllers)
-- Change student account password
+- Basic unit tests that validate operation of repositories and services (TODO in near future: adding tests for controllers)
+- Changing student account password
 
 ## Technologies
 - Java 11
