@@ -1,6 +1,6 @@
-# First_Project_Javadev
+# First_Project
 
-Simple app to manage Javadev lessons.
+Simple app to manage lessons.
 
 ## Functionalities
 - Adding, deleting and editing students, teachers and lessons from the admin account
