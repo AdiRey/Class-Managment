@@ -1,4 +1,4 @@
-# First_Project
+# Class Managment
 
 Simple app to manage lessons.
 
